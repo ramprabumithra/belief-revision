@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Belief Revision Engine</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      color: #1f2937;
+    }
+    main {
+      max-width: 920px;
+      margin: 34px auto;
+      padding: 0 18px;
+    }
+    header {
+      margin-bottom: 18px;
+      padding: 22px 24px;
+      background: #243447;
+      color: white;
+      border-radius: 8px;
+      border-left: 8px solid #37b6a6;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+    }
+    .subtitle {
+      margin: 0;
+      color: #d6e2ef;
+      font-size: 15px;
+    }
+    .panel {
+      background: white;
+      border: 1px solid #d7dee8;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 7px;
+      color: #111827;
+    }
+    .hint {
+      margin: -2px 0 10px;
+      color: #64748b;
+      font-size: 14px;
+    }
+    textarea, input {
+      width: 100%;
+      font-size: 16px;
+      padding: 12px;
+      border: 1px solid #b8c2d1;
+      border-radius: 7px;
+      background: #fbfdff;
+      color: #111827;
+      outline: none;
+    }
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+      font-family: Menlo, Consolas, monospace;
+      line-height: 1.45;
+    }
+    input {
+      font-family: Menlo, Consolas, monospace;
+    }
+    textarea:focus, input:focus {
+      border-color: #248b80;
+      box-shadow: 0 0 0 3px rgba(55, 182, 166, 0.18);
+      background: white;
+    }
+    .formula-row {
+      margin-top: 16px;
+    }
+    button {
+      margin-top: 18px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: #248b80;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d756c;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      background: #f8fafc;
+      border: 1px solid #d7dee8;
+      border-radius: 7px;
+      padding: 16px;
+      min-height: 110px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .symbols {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .symbols span {
+      padding: 6px 9px;
+      background: #eef7f6;
+      border: 1px solid #c8e8e3;
+      border-radius: 6px;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 13px;
+      color: #185b54;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Belief Revision Engine</h1>
+      <p class="subtitle">Enter Bob's beliefs, add a new formula, and see the revised belief set.</p>
+    </header>
+
+    <section class="panel">
+      <form method="post">
+        <label>Belief base</label>
+        <p class="hint">Type one formula per line. Earlier lines are treated as slightly more important.</p>
+        <textarea name="base">{{base_text}}</textarea>
+
+        <div class="formula-row">
+          <label>New formula</label>
+          <p class="hint">Use keyboard symbols for input. The result will print with formal logic symbols.</p>
+          <input name="new" value="{{new_text}}">
+        </div>
+
+        <div class="symbols">
+          <span>! = not</span>
+          <span>& = and</span>
+          <span>| = or</span>
+          <span>-> = implies</span>
+          <span>&lt;-&gt; = iff</span>
+        </div>
+
+        <button type="submit">Revise Beliefs</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <label>Output</label>
+      <pre>{{result}}</pre>
+    </section>
+  </main>
+</body>
+</html>
