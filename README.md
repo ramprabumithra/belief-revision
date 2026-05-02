@@ -1,54 +1,67 @@
 # Belief Revision Engine
 
-This project implements a simple belief revision agent for symbolic propositional logic.
-It uses keyboard-friendly symbols:
+This project is a belief revision agent for symbolic propositional logic.
+I kept the syntax keyboard-friendly so it’s easier to type formulas without needing special symbols everywhere.
 
-- negation: `!`
-- conjunction: `&`
-- disjunction: `|`
-- implication: `->`
-- biconditional: `<->`
+Supported operators:
 
-Words like `not`, `and`, `or`, `implies`, and `iff` also work.
+* negation: `!`
+* conjunction: `&`
+* disjunction: `|`
+* implication: `->`
+* biconditional: `<->`
 
-The main Python code is in `app.py`, and the small browser page is in `index.html`.
-The code is written around the assignment story: Bob has a belief set, then learns a new formula from a reliable source.
+You can also type the word versions (`not`, `and`, `or`, `implies`, `iff`) if that feels more natural.
 
-The implementation follows the course pipeline:
+The main logic lives in `app.py`, and there’s a tiny browser UI in `index.html`.
 
-1. Represent a belief base as prioritized propositional formulae.
-2. Check entailment with a self-contained CNF conversion and resolution procedure.
-3. Contract a belief base using priority-based partial meet contraction.
-4. Expand by adding the new belief.
-5. Revise by Levi identity: `K * phi = (K - !phi) + phi`.
+The whole thing is built around the assignment scenario where Bob already has some beliefs, then receives a new piece of information from a trusted source and updates his belief set accordingly.
 
-## Run the small screen
+On the inside, the implementation roughly follows this flow from the course material:
+
+1. Store beliefs as prioritized propositional formulas.
+2. Check entailment using a homemade CNF conversion + resolution setup (didn’t want to rely on external logic libraries here).
+3. Contract the belief base using a priority-based partial meet contraction approach.
+4. Expand the belief base with the incoming belief.
+5. Perform revision using the Levi Identity:
+
+   `K * phi = (K - !phi) + phi`
+---
+## Running the front-end
+
+Start the server with:
 
 ```bash
 python3 app.py
 ```
 
-Then open this in your browser:
+Then open:
 
 ```text
 http://localhost:8000
 ```
 
-The page lets you enter:
+The page is intentionally pretty simple. You just enter:
 
-- the belief base, one belief per line
-- the formula to revise by
+* the current belief base (one belief per line)
+* the new formula Bob learns
 
-The app still uses priorities internally for contraction, but you do not type them.
-Earlier beliefs are treated as slightly more important, and the new formula gets priority `10`.
-If a typed belief has a syntax problem, the app points to the line that caused it.
-The output is shown as a belief set, for example:
+A couple implementation details worth mentioning:
+
+* priorities are still used internally during contraction
+* you don’t manually enter priorities though
+* earlier beliefs are treated as slightly more important
+* the incoming belief automatically gets priority `10`
+
+If there’s a syntax mistake in one of the beliefs, the app tries to point out which line caused the issue instead of failing silently (spent too much time debugging malformed formulas earlier lol).
+
+The result is displayed as a belief set like this:
 
 ```text
 Cn({p, ¬q})
 ```
 
-Beliefs use this format:
+Example belief syntax:
 
 ```text
 p
@@ -56,7 +69,13 @@ p -> q
 !q
 ```
 
-So Bob's belief set `Cn({p, q, r})` can be entered as:
+So if Bob’s starting belief set is:
+
+```text
+Cn({p, q, r})
+```
+
+you would type:
 
 ```text
 p
@@ -64,17 +83,36 @@ q
 r
 ```
 
-If Bob then learns `!(q | r)`, enter that as the new formula. The output is:
+And if Bob later learns:
+
+```text
+!(q | r)
+```
+
+then that becomes the revision formula.
+
+The updated output would look something like:
 
 ```text
 Cn({p, ¬(q ∨ r)})
 ```
-
-## Test
+---
+## Running tests
 
 ```bash
 python3 -m unittest discover -s tests
 ```
+The tests cover a few important things:
 
-The tests cover resolution entailment, consistency, and AGM-oriented properties: Success,
-Inclusion/Vacuity in the non-conflicting case, Consistency, and Extensionality.
+* resolution-based entailment
+* consistency checking
+* some AGM-style revision properties
+
+including:
+
+* Success
+* Inclusion / Vacuity (when there’s no conflict)
+* Consistency
+* Extensionality
+
+I tried to keep the tests focused on behavior instead of implementation details so refactoring the internals later shouldn’t completely break everything.
