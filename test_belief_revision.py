@@ -8,8 +8,6 @@ from app import (
     revise_bobs_beliefs,
     show_bobs_belief_set
 )
-
-
 class LogicTests(unittest.TestCase):
     def test_entailment_with_all_connectives(self):
         # if p iff q, and p is true, then q must be true
@@ -25,10 +23,8 @@ class LogicTests(unittest.TestCase):
         self.assertTrue(
             bob_would_have_to_believe(
                 beliefs,
-                read_form("r")
-            )
+                read_form("r"))
         )
-
     def test_consistency_detection(self):
         # direct contradiction
         self.assertFalse(
@@ -46,8 +42,6 @@ class LogicTests(unittest.TestCase):
                 read_form("q")
             ])
         )
-
-
 class RevisionTests(unittest.TestCase):
     def test_bob_example(self):
         beliefs=read_bobs_beliefs("p\nq\nr")
@@ -59,7 +53,6 @@ class RevisionTests(unittest.TestCase):
             show_bobs_belief_set(revised_beliefs),
             "Cn({p, ¬(q ∨ r)})"
         )
-
     def test_inconsistent_input_example(self):
         beliefs=read_bobs_beliefs(
             "p\nq\np -> !q"
@@ -69,7 +62,6 @@ class RevisionTests(unittest.TestCase):
                 forms_without_priorities(beliefs)
             )
         )
-
     def test_revision_removes_conflict(self):
         beliefs=read_bobs_beliefs("p\nq")
         revised_beliefs=revise_bobs_beliefs(
@@ -85,7 +77,6 @@ class RevisionTests(unittest.TestCase):
                 forms_without_priorities(revised_beliefs)
             )
         )
-
     def test_success(self):
         # after revising with p,
         # Bob should definitely believe p
@@ -100,7 +91,6 @@ class RevisionTests(unittest.TestCase):
                 read_form("p")
             )
         )
-
     def test_vacuity(self):
         # vacuity:
         # if the new belief does not conflict,
@@ -114,7 +104,6 @@ class RevisionTests(unittest.TestCase):
             show_bobs_belief_set(revised_beliefs),
             "Cn({(p → q), p})"
         )
-
     def test_extensionality(self):
         # !(p & q) should be logically equivalent
         # to (!p | !q)
