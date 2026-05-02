@@ -1,7 +1,7 @@
 """
 Belief Revision Engine
 Run:
-    python app.py
+    python3 app.py
 Then open:
     http://localhost:8000
 keeping everything in one file for now because this project is already
