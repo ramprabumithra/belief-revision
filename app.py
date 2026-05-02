@@ -1,14 +1,11 @@
 """
 Belief Revision Engine
-
 Run:
     python app.py
-
 Then open:
     http://localhost:8000
-
 keeping everything in one file for now because this project is already
-long enough honestly
+long enough 
 """
 
 from dataclasses import dataclass
@@ -17,11 +14,9 @@ from urllib.parse import parse_qs
 from html import escape
 import re
 
-
 # ---------------------------------
 # logic form objects
 # ---------------------------------
-
 
 @dataclass(frozen=True)
 class Form:
@@ -37,7 +32,6 @@ class Form:
 
         return "(" + str(self.left) + " " + self.op + " " + str(self.right) + ")"
 
-
 @dataclass(frozen=True,order=True)
 class Lit:
     name:str
@@ -45,7 +39,6 @@ class Lit:
 
     def opposite(self):
         return Lit(self.name,not self.negated)
-
 
 def make_var(name):
     return Form("var",name)
@@ -57,7 +50,6 @@ def negate(item):
 
 def make_binary(op,left,right):
     return Form(op,left,right)
-
 
 # ---------------------------------
 # parser stuff
@@ -83,7 +75,6 @@ symbol_shortcuts={
 }
 
 token_pattern=re.compile(r"\s*(<->|<=>|->|=>|[()!~&|]|[A-Za-z][A-Za-z0-9_]*)")
-
 
 class Parser:
 
@@ -161,10 +152,8 @@ class Parser:
             return make_var(token)
         raise ValueError("expected variable")
 
-
 def read_form(text):
     return Parser(text).parse()
-
 
 # ---------------------------------
 # CNF conversion
@@ -172,7 +161,6 @@ def read_form(text):
 
 # resolution works best in conjunctive normal form (CNF)
 # so we convert everything first
-
 
 def remove_implications(f):
     if f.op=="var":
@@ -194,7 +182,6 @@ def remove_implications(f):
         b=make_binary("|",negate(right),left)
         return make_binary("&",a,b)
     return make_binary(f.op,left,right)
-
 
 def move_negations(f):
     if f.op=="var":
@@ -230,7 +217,6 @@ def move_negations(f):
         )
     raise Exception("negation issue")
 
-
 def spread_or(f):
     # distributive law step
     # needed for full CNF conversion
@@ -254,20 +240,16 @@ def spread_or(f):
         return make_binary("&",a,b)
     return make_binary("|",left,right)
 
-
 def to_cnf(f):
     no_implications=remove_implications(f)
     pushed_negations=move_negations(no_implications)
     return spread_or(pushed_negations)
-
 
 # ---------------------------------
 # clause generation
 # ---------------------------------
 
 # resolution uses clauses instead of tree formulas
-
-
 def make_clause(f):
     clause=set()
     def walk(part):
@@ -283,7 +265,6 @@ def make_clause(f):
     walk(f)
     return frozenset(clause)
 
-
 def clause_is_tautology(clause):
     # p OR !p is always true
     # tautologies give no useful information in resolution
@@ -291,7 +272,6 @@ def clause_is_tautology(clause):
         if item.opposite() in clause:
             return True
     return False
-
 
 def make_clauses(f):
     clauses=set()
@@ -307,7 +287,6 @@ def make_clauses(f):
     collect(to_cnf(f))
     return clauses
 
-
 def clauses_from_forms(forms):
     all_clauses=set()
     for form in forms:
@@ -315,11 +294,9 @@ def clauses_from_forms(forms):
             all_clauses.add(c)
     return all_clauses
 
-
 # ---------------------------------
 # resolution algorithm
 # ---------------------------------
-
 
 def resolve(c1,c2):
     results=set()
@@ -338,7 +315,6 @@ def resolve(c1,c2):
             if not clause_is_tautology(final):
                 results.add(final)
     return results
-
 
 def contradiction_exists(clauses):
     clauses=set(clauses)
@@ -365,15 +341,12 @@ def contradiction_exists(clauses):
             break
     return False
 
-
 # ---------------------------------
 # bob belief revision
 # ---------------------------------
 
 # this section models Bob's beliefs
 # priorities matter because weaker beliefs get removed first
-
-
 def bob_would_have_to_believe(known_forms,target):
     # proof by contradiction:
     # if adding NOT target creates contradiction,
@@ -383,17 +356,14 @@ def bob_would_have_to_believe(known_forms,target):
     clauses=clauses.union(opposite)
     return contradiction_exists(clauses)
 
-
 def bob_is_consistent(forms):
     return not contradiction_exists(clauses_from_forms(forms))
-
 
 def forms_without_priorities(beliefs):
     forms=[]
     for item in beliefs:
         forms.append(item[0])
     return forms
-
 
 def read_bobs_beliefs(text):
     beliefs=[]
@@ -409,14 +379,12 @@ def read_bobs_beliefs(text):
         priority-=1
     return beliefs
 
-
 def weakest_belief_index(beliefs):
     weakest=0
     for i in range(len(beliefs)):
         if beliefs[i][1]<beliefs[weakest][1]:
             weakest=i
     return weakest
-
 
 def remove_support_for(beliefs,formula):
     current=beliefs.copy()
@@ -431,7 +399,6 @@ def remove_support_for(beliefs,formula):
         current.pop(weakest)
     return current
 
-
 def revise_bobs_beliefs(beliefs,new_form):
     # Levi Identity:
     # revise(B,p)=contract(B,!p)+p
@@ -443,11 +410,9 @@ def revise_bobs_beliefs(beliefs,new_form):
     smaller.append((new_form,10))
     return smaller
 
-
 # ---------------------------------
 # displaying logic
 # ---------------------------------
-
 
 def show_form(f):
     if f.op=="var":
@@ -465,36 +430,29 @@ def show_form(f):
         op="↔"
     return "(" + show_form(f.left) + " " + op + " " + show_form(f.right) + ")"
 
-
 def show_bobs_belief_set(beliefs):
     text=[]
     for item in beliefs:
         text.append(show_form(item[0]))
     return "Cn({" + ", ".join(text) + "})"
 
-
 # ---------------------------------
 # webpage
 # ---------------------------------
 
+default_belief="p\nq\nr"
+default_new="!(q | r)"
+html_doc="index.html"
 
-DEFAULT_BELIEFS="p\nq\nr"
-DEFAULT_NEW="!(q | r)"
-
-HTML_FILE="index.html"
-
-
-def make_page(base=DEFAULT_BELIEFS,new=DEFAULT_NEW,result=""):
-    with open(HTML_FILE,"r",encoding="utf-8") as f:
+def make_page(base=default_belief,new=default_new,result=""):
+    with open(html_doc,"r",encoding="utf-8") as f:
         html=f.read()
     html=html.replace("{{base_text}}",escape(base))
     html=html.replace("{{new_text}}",escape(new))
     html=html.replace("{{result}}",escape(result))
     return html
 
-
 class WebPage(BaseHTTPRequestHandler):
-
     def send_html(self,html):
         encoded=html.encode("utf-8")
         self.send_response(200)
@@ -536,7 +494,6 @@ class WebPage(BaseHTTPRequestHandler):
             # maybe add traceback logging later
             output="error: "+str(e)
         self.send_html(make_page(base,new,output))
-
 
 if __name__=="__main__":
     print("starting server...")
